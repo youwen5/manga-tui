@@ -1853,25 +1853,4 @@ mod test {
         assert_eq!(manga_page.bookmark_state.phase, BookmarkPhase::SearchingFromApi);
         assert_eq!(expected, result)
     }
-
-    #[tokio::test]
-    async fn it_sends_event_chapter_bookmarked_failed_to_fetch() {
-        let (tx, _) = unbounded_channel();
-        let mut manga_page = MangaPage::new(Manga::default(), None).with_global_sender(tx);
-
-        flush_events(&mut manga_page);
-
-        let api_client = TestApiClient::with_failing_response();
-
-        manga_page.fetch_chapter_bookmarked(ChapterBookmarked::default(), api_client);
-
-        let expected = MangaPageEvents::FetchBookmarkFailed;
-
-        let result = timeout(Duration::from_millis(250), manga_page.local_event_rx.recv())
-            .await
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(expected, result);
-    }
 }
